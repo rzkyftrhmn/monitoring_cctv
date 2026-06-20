@@ -117,7 +117,7 @@
 <nav class="navbar navbar-custom px-4 py-3">
     <span class="navbar-brand text-white fw-bold">
         <i class="bi bi-camera-video-fill me-2 text-primary"></i>
-        Monitoring Kemacetan Bandung
+        Monitoring Kemacetan Jogja
     </span>
     <div class="d-flex align-items-center gap-2">
         <span class="dot-live"></span>
