@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\TrafficData;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class TrafficController extends Controller
+{
+    // Dipanggil oleh scheduler untuk fetch data dari Python
+    public function fetchFromPython()
+    {
+        try {
+            $response = Http::timeout(5)->get('http://localhost:5000/api/traffic');
+
+            if (!$response->ok()) {
+                return false;
+            }
+
+            $data = $response->json('data');
+
+            foreach ($data as $item) {
+                TrafficData::updateOrCreate(
+                    ['key' => $item['key']],
+                    [
+                        'nama'            => $item['nama'],
+                        'status'          => $item['status'],
+                        'total_kendaraan' => $item['total_kendaraan'],
+                        'motor'           => $item['detail']['motor'],
+                        'mobil'           => $item['detail']['mobil'],
+                        'bus'             => $item['detail']['bus'],
+                        'truk'            => $item['detail']['truk'],
+                        'waktu_update'    => $item['waktu_update'],
+                    ]
+                );
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    // Dipanggil oleh dashboard untuk ambil data dari DB
+    public function index()
+    {
+        $data = TrafficData::all();
+        return view('dashboard', compact('data'));
+    }
+
+    // Dipanggil dashboard untuk ambil data JSON (untuk polling)
+    public function apiIndex()
+    {
+        $data = TrafficData::all();
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+}
