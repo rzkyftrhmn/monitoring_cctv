@@ -76,10 +76,12 @@ class TrafficController extends Controller
 
     public function history(Request $request, $key)
     {
-        $minutes = $request->query('minutes', 30);
+        $minutes = (int) $request->query('minutes', 30);
+        $now = now();
 
         $histories = TrafficHistory::where('key', $key)
-            ->where('window_start', '>=', now()->subMinutes($minutes))
+            ->where('window_end', '>', $now->copy()->subMinutes($minutes))
+            ->where('window_end', '<=', $now)
             ->orderBy('window_start')
             ->get([
                 'window_start',
